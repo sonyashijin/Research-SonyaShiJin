@@ -46,6 +46,19 @@ class MainViewController: UIViewController {
     /// Maintains the aggregate time for each action the model predicts.
     /// - Tag: actionFrameCounts
     var actionFrameCounts = [String: Int]()
+    
+    var referencePose: Pose?
+    
+    //let threshold: CGFloat = 10.0
+    
+    var currentRawFrame: CGImage?
+
+    let calibrationButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Calibrate", for: .normal)
+        button.addTarget(self, action: #selector(handleCalibration), for: .touchUpInside)
+        return button
+    }()
 }
 
 // MARK: - View Controller Events
@@ -56,9 +69,11 @@ extension MainViewController {
 
         // Disable the idle timer to prevent the screen from locking.
         UIApplication.shared.isIdleTimerDisabled = true
-
+        view.addSubview(calibrationButton)
+        calibrationButton.frame = CGRect(x: 20, y: 20, width: 100, height: 50)
+        
         // Round the corners of the stack and button views.
-        let views = [labelStack, buttonStack, cameraButton, summaryButton]
+        let views = [labelStack, buttonStack, cameraButton, summaryButton, calibrationButton]
         views.forEach { view in
             view?.layer.cornerRadius = 10
             view?.overrideUserInterfaceStyle = .dark
@@ -182,11 +197,13 @@ extension MainViewController: VideoProcessingChainDelegate {
     func videoProcessingChain(_ chain: VideoProcessingChain,
                               didDetect poses: [Pose]?,
                               in frame: CGImage) {
+        self.currentRawFrame = frame
         // Render the poses on a different queue than pose publisher.
         DispatchQueue.global(qos: .userInteractive).async {
             // Draw the poses onto the frame.
             self.drawPoses(poses, onto: frame)
         }
+        
     }
 }
 
@@ -268,4 +285,45 @@ extension MainViewController {
         // Update the UI's full-screen image view on the main thread.
         DispatchQueue.main.async { self.imageView.image = frameWithPosesRendering }
     }
+    
+    @objc func handleCalibration() {
+        referencePose = getCurrentDetectedPose()
+        if referencePose != nil {
+            actionLabel.text = "Calibration successful!"
+        } else {
+            actionLabel.text = "Calibration failed. Please try again."
+        }
+    }
+    
+    func getCurrentVideoFrame() -> CGImage? {
+        return self.currentRawFrame
+    }
+
+    func getCurrentDetectedPose() -> Pose? {
+        // Assuming you have a method to get the current video frame
+        guard let currentFrame = getCurrentVideoFrame() else { return nil }
+
+        let bodyPoseRequest = VNDetectHumanBodyPoseRequest(completionHandler: nil)
+        let requestHandler = VNImageRequestHandler(cgImage: currentFrame, options: [:])
+
+        do {
+            try requestHandler.perform([bodyPoseRequest])
+            if let observation = bodyPoseRequest.results?.first as? VNHumanBodyPoseObservation {
+                return Pose(observation)
+            }
+        } catch {
+            print("Error detecting body pose: \(error)")
+        }
+
+        return nil
+    }
+
+
+
+    func calculateDeviation(detected: CGPoint, reference: CGPoint) -> CGFloat {
+        // Calculate the deviation between two points (this is a simple Euclidean distance for this example)
+        return sqrt(pow(detected.x - reference.x, 2) + pow(detected.y - reference.y, 2))
+    }
+
+
 }
