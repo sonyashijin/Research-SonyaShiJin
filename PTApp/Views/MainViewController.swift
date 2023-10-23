@@ -71,6 +71,7 @@ extension MainViewController {
         UIApplication.shared.isIdleTimerDisabled = true
         view.addSubview(calibrationButton)
         calibrationButton.frame = CGRect(x: 20, y: 20, width: 100, height: 50)
+        calibrationButton.center = view.center
         
         // Round the corners of the stack and button views.
         let views = [labelStack, buttonStack, cameraButton, summaryButton, calibrationButton]
@@ -287,11 +288,24 @@ extension MainViewController {
     }
     
     @objc func handleCalibration() {
-        referencePose = getCurrentDetectedPose()
-        if referencePose != nil {
-            actionLabel.text = "Calibration successful!"
-        } else {
-            actionLabel.text = "Calibration failed. Please try again."
+        // Disable the calibration button immediately after it's clicked
+        calibrationButton.isEnabled = false
+
+        // Introduce a delay (e.g., 5 seconds) to give the user time to step back
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            // Perform the calibration
+            self.referencePose = self.getCurrentDetectedPose()
+
+            // Update the UI based on the calibration result
+            if self.referencePose != nil {
+                self.actionLabel.text = "Calibration successful!"
+                // Hide the calibration button after successful calibration
+                self.calibrationButton.isHidden = true
+            } else {
+                self.actionLabel.text = "Calibration failed. Please try again."
+                // Re-enable the calibration button in case of failure
+                self.calibrationButton.isEnabled = true
+            }
         }
     }
     
@@ -299,7 +313,7 @@ extension MainViewController {
         return self.currentRawFrame
     }
 
-    func getCurrentDetectedPose() -> Pose? {
+    func () -> Pose? {
         // Assuming you have a method to get the current video frame
         guard let currentFrame = getCurrentVideoFrame() else { return nil }
 
