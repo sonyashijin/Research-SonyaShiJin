@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A2D23AD22BB70E400494C55"
-               BuildableName = "Guess My Exercise.app"
-               BlueprintName = "Guess My Exercise"
-               ReferencedContainer = "container:GuessMyExercise.xcodeproj">
+               BuildableName = "PTApp.app"
+               BlueprintName = "PTApp"
+               ReferencedContainer = "container:Research-SonyaShiJin.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A2D23AD22BB70E400494C55"
-            BuildableName = "Guess My Exercise.app"
-            BlueprintName = "Guess My Exercise"
-            ReferencedContainer = "container:GuessMyExercise.xcodeproj">
+            BuildableName = "PTApp.app"
+            BlueprintName = "PTApp"
+            ReferencedContainer = "container:Research-SonyaShiJin.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A2D23AD22BB70E400494C55"
-            BuildableName = "Guess My Exercise.app"
-            BlueprintName = "Guess My Exercise"
-            ReferencedContainer = "container:GuessMyExercise.xcodeproj">
+            BuildableName = "PTApp.app"
+            BlueprintName = "PTApp"
+            ReferencedContainer = "container:Research-SonyaShiJin.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
