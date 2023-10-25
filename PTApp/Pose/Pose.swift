@@ -26,6 +26,8 @@ struct Pose {
 
     /// A rough approximation of the landmarks' area.
     let area: CGFloat
+    
+    var observation: VNHumanBodyPoseObservation?
 
     /// Creates a `Pose` for each human body pose observation in the array.
     /// - Parameter observations: An array of human body pose observations.
@@ -39,6 +41,7 @@ struct Pose {
     /// - Parameter observation: A human body pose observation.
     init?(_ observation: Observation) {
         // Create a landmark for each joint in the observation.
+        self.observation = observation
         landmarks = observation.availableJointNames.compactMap { jointName in
             guard jointName != JointName.root else {
                 return nil

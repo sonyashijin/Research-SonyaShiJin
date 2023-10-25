@@ -59,6 +59,15 @@ class MainViewController: UIViewController {
         button.addTarget(self, action: #selector(handleCalibration), for: .touchUpInside)
         return button
     }()
+    
+    let holdDetectionHandler = HoldDetectionHandler()
+    
+    var initialPose: Pose?
+    
+    var calibrationState: CalibrationState = .startInstruction
+    
+    //var romDataArray: [ROMData] = []
+
 }
 
 // MARK: - View Controller Events
@@ -73,8 +82,12 @@ extension MainViewController {
         calibrationButton.frame = CGRect(x: 20, y: 20, width: 100, height: 50)
         calibrationButton.center = view.center
         
+        view.addSubview(actionLabel)
+        actionLabel.center = view.center
+        actionLabel.sizeToFit()
+
         // Round the corners of the stack and button views.
-        let views = [labelStack, buttonStack, cameraButton, summaryButton, calibrationButton]
+        let views = [labelStack, buttonStack, cameraButton, summaryButton, calibrationButton, actionLabel]
         views.forEach { view in
             view?.layer.cornerRadius = 10
             view?.overrideUserInterfaceStyle = .dark
@@ -180,31 +193,38 @@ extension MainViewController: VideoProcessingChainDelegate {
     func videoProcessingChain(_ chain: VideoProcessingChain,
                               didPredict actionPrediction: ActionPrediction,
                               for frameCount: Int) {
-
+        
         if actionPrediction.isModelLabel {
             // Update the total number of frames for this action.
             addFrameCount(frameCount, to: actionPrediction.label)
         }
-
+        
         // Present the prediction in the UI.
         updateUILabelsWithPrediction(actionPrediction)
     }
-
+    
     /// Receives a frame and any poses in that frame.
     /// - Parameters:
     ///   - chain: A video-processing chain.
     ///   - poses: A `Pose` array.
     ///   - frame: A video frame as a `CGImage`.
+    
+    
     func videoProcessingChain(_ chain: VideoProcessingChain,
                               didDetect poses: [Pose]?,
                               in frame: CGImage) {
         self.currentRawFrame = frame
-        // Render the poses on a different queue than pose publisher.
         DispatchQueue.global(qos: .userInteractive).async {
-            // Draw the poses onto the frame.
             self.drawPoses(poses, onto: frame)
         }
         
+        if let currentPose = poses?.first, let currentPoseObservation = currentPose.observation {
+            let holdDetected = holdDetectionHandler.detectHold(currentPose: currentPoseObservation)
+            if holdDetected {
+                // Handle the successful hold detection here
+                print("Hold detected!")
+            }
+        }
     }
 }
 
@@ -287,33 +307,90 @@ extension MainViewController {
         DispatchQueue.main.async { self.imageView.image = frameWithPosesRendering }
     }
     
+    
+    enum CalibrationState {
+        case startInstruction
+        case holdStartPosition
+        case performExercise
+        case holdEndPosition
+    }
+
     @objc func handleCalibration() {
-        // Disable the calibration button immediately after it's clicked
-        calibrationButton.isEnabled = false
+        // Start the calibration process with the first state
+        proceedToNextCalibrationStep()
+    }
 
-        // Introduce a delay (e.g., 5 seconds) to give the user time to step back
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            // Perform the calibration
-            self.referencePose = self.getCurrentDetectedPose()
-
-            // Update the UI based on the calibration result
-            if self.referencePose != nil {
-                self.actionLabel.text = "Calibration successful!"
-                // Hide the calibration button after successful calibration
-                self.calibrationButton.isHidden = true
-            } else {
-                self.actionLabel.text = "Calibration failed. Please try again."
-                // Re-enable the calibration button in case of failure
-                self.calibrationButton.isEnabled = true
+    func proceedToNextCalibrationStep() {
+        switch calibrationState {
+        case .startInstruction:
+            // Instruct the user to get into the start position
+            actionLabel.text = "Please get into the start position of the exercise."
+            startCountdown(duration: 5) {
+                self.calibrationState = .holdStartPosition
+                self.proceedToNextCalibrationStep()
+            }
+            
+        case .holdStartPosition:
+            // Instruct the user to hold the start position
+            actionLabel.text = "Hold the start position..."
+            // Assuming you have a method to get the current pose observation
+            if let currentPoseObservation = getCurrentDetectedPose()?.observation {
+                let holdDetected = holdDetectionHandler.detectHold(currentPose: currentPoseObservation)
+                if holdDetected {
+                    // Capture the start pose
+                    referencePose = getCurrentDetectedPose()
+                    self.calibrationState = .performExercise
+                    self.proceedToNextCalibrationStep()
+                }
+            }
+            
+        case .performExercise:
+            // Instruct the user to perform the exercise
+            actionLabel.text = "Now, perform one rep of the exercise."
+            startCountdown(duration: 10) { // Assuming a max of 10 seconds for the exercise
+                self.calibrationState = .holdEndPosition
+                self.proceedToNextCalibrationStep()
+            }
+            
+        case .holdEndPosition:
+            // Instruct the user to hold the end position
+            actionLabel.text = "Hold your end position..."
+            // Assuming you have a method to get the current pose observation
+            if let currentPoseObservation = getCurrentDetectedPose()?.observation {
+                let holdDetected = holdDetectionHandler.detectHold(currentPose: currentPoseObservation)
+                if holdDetected {
+                    // Capture the end pose
+                    let endPose = self.getCurrentDetectedPose()
+                    // TODO: Capture the ROM data by comparing the referencePose and endPose
+                    // Store this data for future analytics
+                    self.actionLabel.text = "Calibration successful! Ready to start the exercise."
+                    self.calibrationButton.isHidden = true
+                }
             }
         }
     }
-    
+
+
+    func startCountdown(duration: Int, completion: @escaping () -> Void) {
+        var remainingTime = duration
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if remainingTime <= 0 {
+                timer.invalidate()
+                completion()
+            } else {
+                remainingTime -= 1
+            }
+        }
+    }
+
+
+
+
     func getCurrentVideoFrame() -> CGImage? {
         return self.currentRawFrame
     }
 
-    func () -> Pose? {
+    func getCurrentDetectedPose() -> Pose? {
         // Assuming you have a method to get the current video frame
         guard let currentFrame = getCurrentVideoFrame() else { return nil }
 
@@ -334,10 +411,6 @@ extension MainViewController {
 
 
 
-    func calculateDeviation(detected: CGPoint, reference: CGPoint) -> CGFloat {
-        // Calculate the deviation between two points (this is a simple Euclidean distance for this example)
-        return sqrt(pow(detected.x - reference.x, 2) + pow(detected.y - reference.y, 2))
-    }
 
 
 }

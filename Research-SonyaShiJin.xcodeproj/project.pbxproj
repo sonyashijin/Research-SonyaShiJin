@@ -14,6 +14,7 @@
 		4A2D23BE22BB70E500494C55 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A2D23BC22BB70E500494C55 /* LaunchScreen.storyboard */; };
 		4AA5C4B822BB9CC200277977 /* VideoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AA5C4B722BB9CC200277977 /* VideoCapture.swift */; };
 		50E5D801247B932E00A25665 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E5D800247B932E00A25665 /* SummaryViewController.swift */; };
+		720250C22AE9C21200EAB6A7 /* HoldDetectionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720250C12AE9C21200EAB6A7 /* HoldDetectionHandler.swift */; };
 		DF120B2C2565F89F003ABE6E /* ExerciseClassifier+PredictAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF120B2B2565F89F003ABE6E /* ExerciseClassifier+PredictAction.swift */; };
 		DF20C7362578044800C9DB98 /* Pose+Landmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF20C7352578044800C9DB98 /* Pose+Landmark.swift */; };
 		DF20C7392578047E00C9DB98 /* Pose+Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF20C7382578047E00C9DB98 /* Pose+Connection.swift */; };
@@ -44,6 +45,7 @@
 		4AA5C4B722BB9CC200277977 /* VideoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapture.swift; sourceTree = "<group>"; };
 		50E5D800247B932E00A25665 /* SummaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		57C02DF057C02B4000000001 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		720250C12AE9C21200EAB6A7 /* HoldDetectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldDetectionHandler.swift; sourceTree = "<group>"; };
 		A7EFFBC4008F114FF6A77F64 /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		DF120B2B2565F89F003ABE6E /* ExerciseClassifier+PredictAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExerciseClassifier+PredictAction.swift"; sourceTree = "<group>"; };
 		DF20C7352578044800C9DB98 /* Pose+Landmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Pose+Landmark.swift"; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 		4A2D23B022BB70E400494C55 /* PTApp */ = {
 			isa = PBXGroup;
 			children = (
+				720250C02AE9C1FA00EAB6A7 /* Calibration */,
 				4AFBF15222CC9A1300A4B11A /* Video Capture */,
 				DF141726255E0E2B007498A9 /* Video Processing Chain */,
 				DF96FB2D256880390086C3AB /* Pose */,
@@ -153,6 +156,14 @@
 				4A2D23B722BB70E400494C55 /* Main.storyboard */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		720250C02AE9C1FA00EAB6A7 /* Calibration */ = {
+			isa = PBXGroup;
+			children = (
+				720250C12AE9C21200EAB6A7 /* HoldDetectionHandler.swift */,
+			);
+			path = Calibration;
 			sourceTree = "<group>";
 		};
 		CC72525E56AA0CF9B92F2E67 /* LICENSE */ = {
@@ -293,6 +304,7 @@
 				DFE2078525AFECC800FB76EF /* AVCaptureVideoDataOutput+PixelFormat.swift in Sources */,
 				DFCEDF9F25CDF50100E9CBDE /* ExerciseClassifier.mlmodel in Sources */,
 				DFA9EECB2571951800849AFB /* Pose.swift in Sources */,
+				720250C22AE9C21200EAB6A7 /* HoldDetectionHandler.swift in Sources */,
 				DF20C73C257805AE00C9DB98 /* Pose+Empty.swift in Sources */,
 				DF20C7362578044800C9DB98 /* Pose+Landmark.swift in Sources */,
 				DFA5AF012564A6CC00B6E0FC /* ExerciseClassifier+FrameRate.swift in Sources */,
